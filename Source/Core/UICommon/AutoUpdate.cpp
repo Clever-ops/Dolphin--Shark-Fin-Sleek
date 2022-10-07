@@ -70,6 +70,16 @@ std::string MakeUpdaterCommandLine(const std::map<std::string, std::string>& fla
   return cmdline;
 }
 
+std::string GetUpdaterPath()
+{
+#ifdef __APPLE__
+  // Starting with PR 10428, the updater app is now embeded in the main bundle.
+  return File::GetBundleDirectory() + "/Contents/MacOS/" + UPDATER_FILENAME;
+#else
+  return File::GetExeDirectory() + DIR_SEP + UPDATER_FILENAME;
+#endif
+}
+
 // Used to remove the relocated updater file once we don't need it anymore.
 void CleanupFromPreviousUpdate()
 {
@@ -79,6 +89,15 @@ void CleanupFromPreviousUpdate()
   File::DeleteDirRecursively(reloc_updater_path);
 #else
   File::Delete(reloc_updater_path);
+#endif
+
+#ifdef __APPLE__
+  // Clean up the old separate updater app if it exists.
+  const std::string old_updater_path = File::GetExeDirectory() + DIR_SEP + UPDATER_FILENAME;
+  if (File::Exists(old_updater_path))
+  {
+    File::DeleteDirRecursively(old_updater_path);
+  }
 #endif
 }
 #endif
@@ -235,7 +254,7 @@ void AutoUpdateChecker::TriggerUpdate(const AutoUpdateChecker::NewVersionInforma
     updater_flags["binary-to-restart"] = File::GetExePath();
 
   // Copy the updater so it can update itself if needed.
-  std::string updater_path = File::GetExeDirectory() + DIR_SEP + UPDATER_FILENAME;
+  std::string updater_path = GetUpdaterPath();
   std::string reloc_updater_path = File::GetExeDirectory() + DIR_SEP + UPDATER_RELOC_FILENAME;
 
 #ifdef __APPLE__

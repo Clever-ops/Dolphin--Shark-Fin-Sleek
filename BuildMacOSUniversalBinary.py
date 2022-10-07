@@ -288,11 +288,7 @@ def build(config):
                 "-DCMAKE_IGNORE_PATH="+ignore_path,
                 "-DCMAKE_OSX_DEPLOYMENT_TARGET="
                 + config[arch+"_mac_os_deployment_target"],
-                "-DMACOS_CODE_SIGNING_IDENTITY="
-                + config["codesign_identity"],
-                "-DMACOS_CODE_SIGNING_IDENTITY_UPDATER="
-                + config["codesign_identity"],
-                '-DMACOS_CODE_SIGNING="ON"'
+                '-DMACOS_CODE_SIGNING="OFF"'
             ],
             env=env, cwd=arch)
 
@@ -314,6 +310,17 @@ def build(config):
     src_app1 = ARCHITECTURES[1]+"/Binaries/"
 
     recursive_merge_binaries(src_app0, src_app1, dst_app)
+
+    binaries_path = os.path.join(dst_app, "Dolphin.app", "Contents", "MacOS")
+
+    # Remove the embedded Updater if it exists
+    embedded_updater_path = os.path.join(binaries_path, "Dolphin Updater.app")
+    if os.path.exists(embedded_updater_path):
+        shutil.rmtree(embedded_updater_path)
+
+    # Embed the Updater app inside the main Dolphin app bundle
+    shutil.copytree(os.path.join(dst_app, "Dolphin Updater.app"), embedded_updater_path)
+
     for path in glob.glob(dst_app+"/*"):
         if os.path.isdir(path) and os.path.splitext(path)[1] != ".app":
             continue
