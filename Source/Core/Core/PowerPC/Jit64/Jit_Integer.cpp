@@ -144,6 +144,8 @@ void Jit64::FinalizeCarryOverflow(bool oe, bool inv)
 // LT/GT either.
 void Jit64::ComputeRC(preg_t preg, bool needs_test, bool needs_sext)
 {
+  m_constant_propagation.ApplyCurrentInstructionOutputs();
+
   RCOpArg arg = gpr.Use(preg, RCMode::Read);
   RegCache::Realize(arg);
 

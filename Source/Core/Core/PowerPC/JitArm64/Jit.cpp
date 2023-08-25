@@ -1316,10 +1316,12 @@ bool JitArm64::DoJit(u32 em_address, JitBlock* b, u32 nextPC)
         const JitCommon::ConstantPropagationResult constant_propagation_result =
             m_constant_propagation.EvaluateInstruction(op.inst, opinfo->flags);
 
+        m_constant_propagation.SetCurrentInstructionOutputs(op.regsOut);
+
         if (!constant_propagation_result.instruction_fully_executed)
           CompileInstruction(op);
 
-        m_constant_propagation.Apply(constant_propagation_result, op.regsOut);
+        m_constant_propagation.Apply(constant_propagation_result);
 
         if (constant_propagation_result.gpr >= 0)
           gpr.SetImmediate(constant_propagation_result.gpr, constant_propagation_result.gpr_value);

@@ -311,13 +311,12 @@ ConstantPropagation::EvaluateTable31SBOneRegisterKnown(UGeckoInstruction inst, u
   return ConstantPropagationResult(inst.RA, a, inst.Rc);
 }
 
-void ConstantPropagation::Apply(ConstantPropagationResult result, BitSet32 gprs_out)
+void ConstantPropagation::Apply(ConstantPropagationResult result)
 {
-  if (!result.instruction_fully_executed)
-    m_gpr_values_known &= ~gprs_out;
-
   if (result.gpr >= 0)
     SetGPR(result.gpr, result.gpr_value);
+
+  ApplyCurrentInstructionOutputs();
 }
 
 }  // namespace JitCommon

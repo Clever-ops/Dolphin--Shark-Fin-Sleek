@@ -48,7 +48,17 @@ class ConstantPropagation final
 public:
   ConstantPropagationResult EvaluateInstruction(UGeckoInstruction inst, u64 flags) const;
 
-  void Apply(ConstantPropagationResult result, BitSet32 gprs_out);
+  // Should be called for each instruction before emitting code for it. This lets the constant
+  // propagation code know which registers will be written to by the instruction.
+  void SetCurrentInstructionOutputs(BitSet32 gprs_out) { m_current_instruction_outputs = gprs_out; }
+
+  // Marks all registers written to by the current instruction as having unknown values, except
+  // registers that SetGPR has already been called for. Normally this is called automatically by
+  // Apply, but code that reads the result of the current instruction should call this early to
+  // avoid reading stale values.
+  void ApplyCurrentInstructionOutputs() { m_gpr_values_known &= ~m_current_instruction_outputs; }
+
+  void Apply(ConstantPropagationResult result);
 
   template <typename... Args>
   bool HasGPR(Args... gprs) const
@@ -61,8 +71,9 @@ public:
 
   void SetGPR(size_t gpr, u32 value)
   {
-    m_gpr_values_known[gpr] = true;
     m_gpr_values[gpr] = value;
+    m_gpr_values_known[gpr] = true;
+    m_current_instruction_outputs[gpr] = false;
   }
 
   void Clear() { m_gpr_values_known = BitSet32{}; }
@@ -90,6 +101,7 @@ private:
 
   std::array<u32, GPR_COUNT> m_gpr_values;
   BitSet32 m_gpr_values_known{};
+  BitSet32 m_current_instruction_outputs{};
 };
 
 }  // namespace JitCommon
