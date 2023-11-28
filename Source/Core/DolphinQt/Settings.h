@@ -143,7 +143,6 @@ public:
 
   // Cheats
   bool GetCheatsEnabled() const;
-  void SetCheatsEnabled(bool enabled);
 
   // Debug
   void SetDebugModeEnabled(bool enabled);
