@@ -3,7 +3,15 @@
 
 #include "Core/PowerPC/CachedInterpreter/CachedInterpreter.h"
 
+#include <span>
+#include <sstream>
+#include <utility>
+
+#include <fmt/format.h>
+#include <fmt/ostream.h>
+
 #include "Common/CommonTypes.h"
+#include "Common/GekkoDisassembler.h"
 #include "Common/Logging/Log.h"
 #include "Core/ConfigManager.h"
 #include "Core/Core.h"
@@ -253,14 +261,11 @@ void CachedInterpreter::Jit(u32 em_address, bool clear_cache_and_retry_on_failur
       b->near_end = GetWritableCodePtr();
       b->far_begin = b->far_end = nullptr;
 
-      b->codeSize = static_cast<u32>(GetCodePtr() - b->normalEntry);
-      b->originalSize = code_block.m_num_instructions;
-
       // Mark the memory region that this code block uses in the RangeSizeSet.
       if (b->near_begin != b->near_end)
         m_free_ranges.erase(b->near_begin, b->near_end);
 
-      m_block_cache.FinalizeBlock(*b, jo.enableBlocklink, code_block.m_physical_addresses);
+      m_block_cache.FinalizeBlock(*b, jo.enableBlocklink, code_block, m_code_buffer);
 
       return;
     }
@@ -331,13 +336,17 @@ bool CachedInterpreter::DoJit(u32 em_address, JitBlock* b, u32 nextPC)
             interpreter,   Interpreter::GetInterpreterOp(op.inst),
             js.compilerPC, op.inst,
             power_pc,      js.downcountAmount};
-        Write(op.canEndBlock ? Interpret<true, true> : Interpret<true, false>, operands);
+        Write(op.canEndBlock ? CallbackCast(Interpret<true, true>) :
+                               CallbackCast(Interpret<true, false>),
+              operands);
       }
       else
       {
         const InterpretOperands<false> operands = {
             interpreter, Interpreter::GetInterpreterOp(op.inst), js.compilerPC, op.inst};
-        Write(op.canEndBlock ? Interpret<false, true> : Interpret<false, false>, operands);
+        Write(op.canEndBlock ? CallbackCast(Interpret<false, true>) :
+                               CallbackCast(Interpret<false, false>),
+              operands);
       }
 
       if (op.branchIsIdleLoop)
@@ -360,6 +369,29 @@ bool CachedInterpreter::DoJit(u32 em_address, JitBlock* b, u32 nextPC)
   return true;
 }
 
+void CachedInterpreter::EraseSingleBlock(const JitBlock& block)
+{
+  m_block_cache.EraseSingleBlock(block);
+}
+
+void CachedInterpreter::DisasmNearCode(const JitBlock& block, std::ostream& stream,
+                                       std::size_t& instruction_count) const
+{
+  Disassemble(block, stream, instruction_count);
+}
+
+void CachedInterpreter::DisasmFarCode(const JitBlock& block, std::ostream& stream,
+                                      std::size_t& instruction_count) const
+{
+  instruction_count = 0;
+  stream << "N/A\n";
+}
+
+std::vector<JitBase::MemoryStats> CachedInterpreter::GetMemoryStats() const
+{
+  return {{"free", m_free_ranges.get_stats()}};
+}
+
 void CachedInterpreter::ClearCache()
 {
   m_block_cache.Clear();
@@ -367,4 +399,25 @@ void CachedInterpreter::ClearCache()
   ClearCodeSpace();
   ResetFreeMemoryRanges();
   RefreshConfig();
+  JitBase::ClearCache();
+}
+
+void CachedInterpreter::LogGeneratedCode() const
+{
+  std::ostringstream stream;
+
+  stream << "\nPPC Code Buffer:\n";
+  for (const PPCAnalyst::CodeOp& op :
+       std::span{m_code_buffer.data(), code_block.m_num_instructions})
+  {
+    fmt::print(stream, "0x{:08x}\t\t{}\n", op.address,
+               Common::GekkoDisassembler::Disassemble(op.inst.hex, op.address));
+  }
+
+  std::size_t dummy;
+  stream << "\nHost Code:\n";
+  Disassemble(*js.curBlock, stream, dummy);
+
+  // TODO C++20: std::ostringstream::view()
+  DEBUG_LOG_FMT(DYNA_REC, "{}", std::move(stream).str());
 }

@@ -46,6 +46,16 @@ public:
   void Jit(u32 address, bool clear_cache_and_retry_on_failure);
   bool DoJit(u32 address, JitBlock* b, u32 nextPC);
 
+  static void Disassemble(const JitBlock& block, std::ostream& stream,
+                          std::size_t& instruction_count);
+
+  void EraseSingleBlock(const JitBlock& block) override;
+  void DisasmNearCode(const JitBlock& block, std::ostream& stream,
+                      std::size_t& instruction_count) const override;
+  void DisasmFarCode(const JitBlock& block, std::ostream& stream,
+                     std::size_t& instruction_count) const override;
+  virtual std::vector<JitBase::MemoryStats> GetMemoryStats() const override;
+
   JitBaseBlockCache* GetBlockCache() override { return &m_block_cache; }
   const char* GetName() const override { return "Cached Interpreter"; }
   const CommonAsmRoutinesBase* GetAsmRoutines() override { return nullptr; }
@@ -58,6 +68,7 @@ private:
   // Finds a free memory region and sets the code emitter to point at that region.
   // Returns false if no free memory region can be found.
   bool SetEmitterStateToFreeCodeRegion();
+  void LogGeneratedCode() const;
 
   void FreeRanges();
   void ResetFreeMemoryRanges();
@@ -72,16 +83,24 @@ private:
   struct CheckIdleOperands;
 
   static s32 EndBlock(PowerPC::PowerPCState& ppc_state, const EndBlockOperands& operands);
+  static s32 EndBlock(std::ostream& stream, const EndBlockOperands& operands);
   template <bool check_exceptions, bool write_pc>
   static s32 Interpret(PowerPC::PowerPCState& ppc_state,
                        const InterpretOperands<check_exceptions>& operands);
+  template <bool check_exceptions, bool write_pc>
+  static s32 Interpret(std::ostream& stream, const InterpretOperands<check_exceptions>& operands);
   static s32 HLEFunction(PowerPC::PowerPCState& ppc_state, const HLEFunctionOperands& operands);
+  static s32 HLEFunction(std::ostream& stream, const HLEFunctionOperands& operands);
   static s32 WriteBrokenBlockNPC(PowerPC::PowerPCState& ppc_state,
                                  const WriteBrokenBlockNPCOperands& operands);
+  static s32 WriteBrokenBlockNPC(std::ostream& stream, const WriteBrokenBlockNPCOperands& operands);
   static s32 CheckFPU(PowerPC::PowerPCState& ppc_state, const CheckFPUOperands& operands);
+  static s32 CheckFPU(std::ostream& stream, const CheckFPUOperands& operands);
   static s32 CheckBreakpoint(PowerPC::PowerPCState& ppc_state,
                              const CheckBreakpointOperands& operands);
+  static s32 CheckBreakpoint(std::ostream& stream, const CheckBreakpointOperands& operands);
   static s32 CheckIdle(PowerPC::PowerPCState& ppc_state, const CheckIdleOperands& operands);
+  static s32 CheckIdle(std::ostream& stream, const CheckIdleOperands& operands);
 
   HyoutaUtilities::RangeSizeSet<u8*> m_free_ranges;
   CachedInterpreterBlockCache m_block_cache;

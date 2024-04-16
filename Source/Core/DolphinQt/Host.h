@@ -38,6 +38,8 @@ signals:
   void RequestStop();
   void RequestRenderSize(int w, int h);
   void UpdateDisasmDialog();
+  void JitCacheCleared();
+  void JitProfileDataWiped();
   void PPCSymbolsChanged();
 
 private:
