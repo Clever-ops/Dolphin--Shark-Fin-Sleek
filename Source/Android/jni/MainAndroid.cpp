@@ -406,6 +406,22 @@ JNIEXPORT jint JNICALL Java_org_dolphinemu_dolphinemu_NativeLibrary_GetMaxLogLev
   return static_cast<jint>(Common::Log::MAX_LOGLEVEL);
 }
 
+JNIEXPORT void JNICALL Java_org_dolphinemu_dolphinemu_NativeLibrary_WipeJitBlockProfilingData(
+    JNIEnv* env, jclass native_library_class)
+{
+  HostThreadLock guard;
+  auto& system = Core::System::GetInstance();
+  auto& jit_interface = system.GetJitInterface();
+  if (jit_interface.GetCore() == nullptr)
+  {
+    env->CallStaticVoidMethod(native_library_class, IDCache::GetDisplayToastMsg(),
+                              ToJString(env, Common::GetStringT("JIT is not active")),
+                              static_cast<jboolean>(false));
+    return;
+  }
+  jit_interface.WipeBlockProfilingData(Core::CPUThreadGuard{system});
+}
+
 JNIEXPORT void JNICALL Java_org_dolphinemu_dolphinemu_NativeLibrary_WriteJitBlockLogDump(
     JNIEnv* env, jclass native_library_class)
 {

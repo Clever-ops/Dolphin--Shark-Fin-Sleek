@@ -106,6 +106,12 @@ void JitInterface::UpdateMembase()
   }
 }
 
+void JitInterface::WipeBlockProfilingData(const Core::CPUThreadGuard& guard)
+{
+  if (m_jit)
+    m_jit->GetBlockCache()->WipeBlockProfilingData(guard);
+}
+
 static std::string_view GetDescription(const CPUEmuFeatureFlags flags)
 {
   static constexpr std::array<std::string_view, (FEATURE_FLAG_END_OF_ENUMERATION - 1) << 1>
