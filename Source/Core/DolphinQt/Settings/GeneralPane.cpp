@@ -26,6 +26,7 @@
 
 #include "DolphinQt/Config/ConfigControls/ConfigBool.h"
 #include "DolphinQt/Config/ToolTipControls/ToolTipCheckBox.h"
+#include "DolphinQt/Config/ToolTipControls/ToolTipComboBox.h"
 #include "DolphinQt/QtUtils/ModalMessageBox.h"
 #include "DolphinQt/QtUtils/NonDefaultQPushButton.h"
 #include "DolphinQt/QtUtils/SetWindowDecorations.h"
@@ -168,7 +169,7 @@ void GeneralPane::CreateBasic()
   speed_limit_layout->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
   basic_group_layout->addLayout(speed_limit_layout);
 
-  m_combobox_speedlimit = new QComboBox();
+  m_combobox_speedlimit = new ToolTipComboBox();
 
   m_combobox_speedlimit->addItem(tr("Unlimited"));
   for (int i = 10; i <= 200; i += 10)  // from 10% to 200%
@@ -405,6 +406,10 @@ void GeneralPane::AddDescriptions()
                  "<br><br>This setting cannot be changed while emulation is active."
                  "<br><br><dolphin_emphasis>If unsure, leave this checked.</dolphin_emphasis>");
 #endif
+  static constexpr char TR_SPEEDLIMIT_DESCRIPTION[] =
+      QT_TR_NOOP("Sets the maximum speed at which games will run. If your computer isn't fast "
+                 "enough, the actual speed may be slower."
+                 "<br><br><dolphin_emphasis>If unsure, select 100%.</dolphin_emphasis>");
 
   m_checkbox_dualcore->SetDescription(tr(TR_DUALCORE_DESCRIPTION));
 
@@ -417,4 +422,7 @@ void GeneralPane::AddDescriptions()
 #ifdef USE_DISCORD_PRESENCE
   m_checkbox_discord_presence->SetDescription(tr(TR_DISCORD_PRESENCE_DESCRIPTION));
 #endif
+
+  m_combobox_speedlimit->SetTitle(tr("Speed Limit"));
+  m_combobox_speedlimit->SetDescription(tr(TR_SPEEDLIMIT_DESCRIPTION));
 }
