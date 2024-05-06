@@ -63,22 +63,22 @@ private:
   void ResetFreeMemoryRanges();
 
   struct EndBlockOperands;
+  template <bool check_exceptions>
   struct InterpretOperands;
   struct HLEFunctionOperands;
-  struct WritePCOperands;
-  struct ExceptionCheckOperands;
+  struct WriteBrokenBlockNPCOperands;
+  struct CheckFPUOperands;
   struct CheckBreakpointOperands;
   struct CheckIdleOperands;
 
   static s32 EndBlock(PowerPC::PowerPCState& ppc_state, const EndBlockOperands& operands);
-  static s32 Interpret(PowerPC::PowerPCState& ppc_state, const InterpretOperands& operands);
+  template <bool check_exceptions, bool write_pc>
+  static s32 Interpret(PowerPC::PowerPCState& ppc_state,
+                       const InterpretOperands<check_exceptions>& operands);
   static s32 HLEFunction(PowerPC::PowerPCState& ppc_state, const HLEFunctionOperands& operands);
-  static s32 WritePC(PowerPC::PowerPCState& ppc_state, const WritePCOperands& operands);
-  static s32 WriteBrokenBlockNPC(PowerPC::PowerPCState& ppc_state, const WritePCOperands& operands);
-  static s32 CheckFPU(PowerPC::PowerPCState& ppc_state, const ExceptionCheckOperands& operands);
-  static s32 CheckDSI(PowerPC::PowerPCState& ppc_state, const ExceptionCheckOperands& operands);
-  static s32 CheckProgramException(PowerPC::PowerPCState& ppc_state,
-                                   const ExceptionCheckOperands& operands);
+  static s32 WriteBrokenBlockNPC(PowerPC::PowerPCState& ppc_state,
+                                 const WriteBrokenBlockNPCOperands& operands);
+  static s32 CheckFPU(PowerPC::PowerPCState& ppc_state, const CheckFPUOperands& operands);
   static s32 CheckBreakpoint(PowerPC::PowerPCState& ppc_state,
                              const CheckBreakpointOperands& operands);
   static s32 CheckIdle(PowerPC::PowerPCState& ppc_state, const CheckIdleOperands& operands);
@@ -95,12 +95,24 @@ struct CachedInterpreter::EndBlockOperands
   u32 : 32;
 };
 
-struct CachedInterpreter::InterpretOperands
+template <>
+struct CachedInterpreter::InterpretOperands<false>
 {
   Interpreter& interpreter;
   void (*func)(Interpreter&, UGeckoInstruction);  // Interpreter::Instruction
   u32 current_pc;
   UGeckoInstruction inst;
+};
+
+template <>
+struct CachedInterpreter::InterpretOperands<true>
+{
+  Interpreter& interpreter;
+  void (*func)(Interpreter&, UGeckoInstruction);  // Interpreter::Instruction
+  u32 current_pc;
+  UGeckoInstruction inst;
+  PowerPC::PowerPCManager& power_pc;
+  u32 downcount;
 };
 
 struct CachedInterpreter::HLEFunctionOperands
@@ -110,13 +122,13 @@ struct CachedInterpreter::HLEFunctionOperands
   u32 hook_index;
 };
 
-struct CachedInterpreter::WritePCOperands
+struct CachedInterpreter::WriteBrokenBlockNPCOperands
 {
   u32 current_pc;
   u32 : 32;
 };
 
-struct CachedInterpreter::ExceptionCheckOperands
+struct CachedInterpreter::CheckFPUOperands
 {
   PowerPC::PowerPCManager& power_pc;
   u32 current_pc;
