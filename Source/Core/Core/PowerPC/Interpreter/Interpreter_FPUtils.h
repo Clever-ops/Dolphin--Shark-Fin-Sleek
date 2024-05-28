@@ -108,7 +108,7 @@ inline double Force25Bit(double d)
     // the fraction is "normal"
     // That is to say shifting it until the MSB of the fraction
     // would escape into the exponent
-    u32 shift = std::countl_zero(fraction) + Common::DOUBLE_FRAC_WIDTH - 63;
+    u32 shift = std::countl_zero(fraction) - (63 - Common::DOUBLE_FRAC_WIDTH);
     keep_mask >>= shift;
     round >>= shift;
 
