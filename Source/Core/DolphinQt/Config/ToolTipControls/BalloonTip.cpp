@@ -326,8 +326,13 @@ void BalloonTip::UpdateBoundsAndRedraw(const QPoint& target_arrow_tip_position,
   // tip pixel is in the right place, but when it's false the arrow is below arrow_tip_exterior_y
   // so the tip pixel would be the one below that. Make this adjustment to fix that.
   const int tip_pixel_adjustment = arrow_at_bottom ? 0 : 1;
+
+  // Make it so the tip renders a bit offset from the box to make it hover
+  // just above the set control point.
+  const int tip_vertical_offset = arrow_at_bottom ? 10 : -10;
+
   const int actual_balloontip_global_y =
-      target_arrow_tip_position.y() - arrow_tip_exterior_y - tip_pixel_adjustment;
+      target_arrow_tip_position.y() - arrow_tip_exterior_y - tip_pixel_adjustment - tip_vertical_offset;
 
   move(actual_balloontip_global_x, actual_balloontip_global_y);
 
