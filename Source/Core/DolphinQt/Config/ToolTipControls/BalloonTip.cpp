@@ -222,7 +222,7 @@ void BalloonTip::UpdateBoundsAndRedraw(const QPoint& target_arrow_tip_position,
   mask_painter.drawPath(rect_path);
 
   const bool arrow_at_bottom =
-      target_arrow_tip_position.y() - size_hint.height() + arrow_height >= 0;
+      target_arrow_tip_position.y() - size_hint.height() + arrow_height >= parent_rect.top();
   const bool arrow_at_left =true;
 
   const float arrow_base_y =
