@@ -111,6 +111,9 @@ BalloonTip::BalloonTip(PrivateTag, const QString& title, QString message, QWidge
 
   if (!message.isEmpty())
     create_label(message);
+  
+  // Save parent to reference the window borders of
+  this->m_parent = parent;
 }
 
 void BalloonTip::paintEvent(QPaintEvent*)
@@ -177,16 +180,9 @@ void BalloonTip::UpdateBoundsAndRedraw(const QPoint& target_arrow_tip_position,
       std::min(adjusted_arrow_x_offset, centered_arrow_x_offset);
   const int arrow_tip_x_offset = arrow_nearest_edge_x_offset + arrow_half_width;
 
-  // The BalloonTip should be contained entirely within the screen that contains the target
+  // The BalloonTip should be contained entirely within the parent window that contains the target
   // position.
-  QScreen* screen = QGuiApplication::screenAt(target_arrow_tip_position);
-  if (screen == nullptr)
-  {
-    // If the target position isn't on any screen (which can happen if the window is partly off the
-    // screen and the user hovers over the label) then use the screen containing the cursor instead.
-    screen = QGuiApplication::screenAt(QCursor::pos());
-  }
-  const QRect screen_rect = screen->geometry();
+  const QRect parent_rect = m_parent->window()->geometry();
 
   QPainterPath rect_path;
   rect_path.addRoundedRect(rect_left, rect_top, rect_width, rect_height, corner_outer_radius,
@@ -228,7 +224,7 @@ void BalloonTip::UpdateBoundsAndRedraw(const QPoint& target_arrow_tip_position,
   const bool arrow_at_bottom =
       target_arrow_tip_position.y() - size_hint.height() + arrow_height >= 0;
   const bool arrow_at_left =
-      target_arrow_tip_position.x() + size_hint.width() - arrow_tip_x_offset < screen_rect.width();
+      target_arrow_tip_position.x() + size_hint.width() - arrow_tip_x_offset < parent_rect.width();
 
   const float arrow_base_y =
       arrow_at_bottom ? rect_bottom - border_half_width : rect_top + border_half_width;
@@ -316,10 +312,10 @@ void BalloonTip::UpdateBoundsAndRedraw(const QPoint& target_arrow_tip_position,
   const int target_balloontip_global_x =
       target_arrow_tip_position.x() - static_cast<int>(arrow_tip_x);
   const int rightmost_valid_balloontip_global_x =
-      screen_rect.left() + screen_rect.width() - size_hint.width();
+      parent_rect.left() + parent_rect.width() - size_hint.width();
   // If the balloon would extend off the screen, push it left or right until it's not
   const int actual_balloontip_global_x =
-      std::max(screen_rect.left(),
+      std::max(parent_rect.left(),
                std::min(rightmost_valid_balloontip_global_x, target_balloontip_global_x));
   // The tip pixel should be in the middle of the control, and arrow_tip_exterior_y is at the bottom
   // of that pixel. When arrow_at_bottom is true the arrow is above arrow_tip_exterior_y and so the
