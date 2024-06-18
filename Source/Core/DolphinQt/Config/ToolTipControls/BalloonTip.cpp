@@ -111,7 +111,7 @@ BalloonTip::BalloonTip(PrivateTag, const QString& title, QString message, QWidge
 
   if (!message.isEmpty())
     create_label(message);
-  
+
   // Save parent to reference the window borders of
   this->m_parent = parent;
 }
@@ -222,7 +222,7 @@ void BalloonTip::UpdateBoundsAndRedraw(const QPoint& target_arrow_tip_position,
 
   const bool arrow_at_bottom =
       target_arrow_tip_position.y() - size_hint.height() + arrow_height >= parent_rect.top();
-  const bool arrow_at_left =true;
+  const bool arrow_at_left = true;
 
   const float arrow_base_y =
       arrow_at_bottom ? rect_bottom - border_half_width : rect_top + border_half_width;
@@ -254,8 +254,9 @@ void BalloonTip::UpdateBoundsAndRedraw(const QPoint& target_arrow_tip_position,
   // This will offset the drawn error to line up agin.
   const float unclamped_arrow_tip_local_x_offset =
       target_balloontip_global_x - actual_balloontip_global_x;
-  const float arrow_tip_local_x_offset = std::min(std::max(unclamped_arrow_tip_local_x_offset, base_arrow_x_offset - arrow_tip_x),
-                                                  (size_hint.width() - base_arrow_x_offset) - arrow_tip_x);
+  const float arrow_tip_local_x_offset =
+      std::min(std::max(unclamped_arrow_tip_local_x_offset, base_arrow_x_offset - arrow_tip_x),
+              (size_hint.width() - base_arrow_x_offset) - arrow_tip_x);
 
   if (show_arrow == ShowArrow::Yes)
   {
@@ -284,8 +285,10 @@ void BalloonTip::UpdateBoundsAndRedraw(const QPoint& target_arrow_tip_position,
       const float border_y_end = border_y_start + y_end_offset;
       const float interior_y_start = arrow_base_y;
       const float interior_y_end = border_y_start;
-      const float left_line_x = arrow_base_left_edge_x + x_offset_from_arrow_base_edge + arrow_tip_local_x_offset;
-      const float right_line_x = arrow_base_right_edge_x - x_offset_from_arrow_base_edge + arrow_tip_local_x_offset;
+      const float left_line_x =
+          arrow_base_left_edge_x + x_offset_from_arrow_base_edge + arrow_tip_local_x_offset;
+      const float right_line_x =
+          arrow_base_right_edge_x - x_offset_from_arrow_base_edge + arrow_tip_local_x_offset;
 
       arrow_border_path.moveTo(left_line_x, border_y_start);
       arrow_border_path.lineTo(left_line_x, border_y_end);
@@ -300,8 +303,10 @@ void BalloonTip::UpdateBoundsAndRedraw(const QPoint& target_arrow_tip_position,
       arrow_interior_fill_path.lineTo(right_line_x, interior_y_end);
     }
     // The middle border line
-    arrow_border_path.moveTo(arrow_tip_x + arrow_tip_local_x_offset, arrow_tip_interior_y);
-    arrow_border_path.lineTo(arrow_tip_x + arrow_tip_local_x_offset, arrow_tip_interior_y + y_end_offset);
+    arrow_border_path.moveTo(arrow_tip_x + arrow_tip_local_x_offset,
+                             arrow_tip_interior_y);
+    arrow_border_path.lineTo(arrow_tip_x + arrow_tip_local_x_offset,
+                             arrow_tip_interior_y + y_end_offset);
 
     // The middle interior line
     arrow_interior_fill_path.moveTo(arrow_tip_x + arrow_tip_local_x_offset, arrow_base_y);
@@ -336,8 +341,8 @@ void BalloonTip::UpdateBoundsAndRedraw(const QPoint& target_arrow_tip_position,
   // just above the set control point.
   const int tip_vertical_offset = arrow_at_bottom ? 10 : -10;
 
-  const int actual_balloontip_global_y =
-      target_arrow_tip_position.y() - arrow_tip_exterior_y - tip_pixel_adjustment - tip_vertical_offset;
+  const int actual_balloontip_global_y = target_arrow_tip_position.y() - arrow_tip_exterior_y -
+                                         tip_pixel_adjustment - tip_vertical_offset;
 
   move(actual_balloontip_global_x, actual_balloontip_global_y);
 
