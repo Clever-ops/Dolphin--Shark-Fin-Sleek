@@ -178,7 +178,6 @@ void BalloonTip::UpdateBoundsAndRedraw(const QPoint& target_arrow_tip_position,
   // the left edge of the arrow interior; otherwise the distance between the right edges.
   const int arrow_nearest_edge_x_offset =
       std::min(adjusted_arrow_x_offset, centered_arrow_x_offset);
-  const int arrow_tip_x_offset = arrow_nearest_edge_x_offset + arrow_half_width;
 
   // The BalloonTip should be contained entirely within the parent window that contains the target
   // position.
