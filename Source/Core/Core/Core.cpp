@@ -398,7 +398,7 @@ static void CpuThread(Core::System& system, const std::optional<std::string>& sa
   {
 #ifndef _WIN32
     std::string gdb_socket = Config::Get(Config::MAIN_GDB_SOCKET);
-    if (!gdb_socket.empty())
+    if (!gdb_socket.empty() && !AchievementManager::GetInstance().IsHardcoreModeActive())
     {
       GDBStub::InitLocal(gdb_socket.data());
       CPUSetInitialExecutionState(true);
@@ -407,7 +407,7 @@ static void CpuThread(Core::System& system, const std::optional<std::string>& sa
 #endif
     {
       int gdb_port = Config::Get(Config::MAIN_GDB_PORT);
-      if (gdb_port > 0)
+      if (gdb_port > 0 && !AchievementManager::GetInstance().IsHardcoreModeActive())
       {
         GDBStub::Init(gdb_port);
         CPUSetInitialExecutionState(true);
@@ -1067,7 +1067,8 @@ void UpdateInputGate(bool require_focus, bool require_full_focus)
 {
   // If the user accepts background input, controls should pass even if an on screen interface is on
   const bool focus_passes =
-      !require_focus || (Host_RendererHasFocus() && !Host_UIBlocksControllerState());
+      !require_focus ||
+      ((Host_RendererHasFocus() || Host_TASInputHasFocus()) && !Host_UIBlocksControllerState());
   // Ignore full focus if we don't require basic focus
   const bool full_focus_passes =
       !require_focus || !require_full_focus || (focus_passes && Host_RendererHasFullFocus());
