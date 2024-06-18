@@ -256,7 +256,7 @@ void BalloonTip::UpdateBoundsAndRedraw(const QPoint& target_arrow_tip_position,
       target_balloontip_global_x - actual_balloontip_global_x;
   const float arrow_tip_local_x_offset =
       std::min(std::max(unclamped_arrow_tip_local_x_offset, base_arrow_x_offset - arrow_tip_x),
-              (size_hint.width() - base_arrow_x_offset) - arrow_tip_x);
+               (size_hint.width() - base_arrow_x_offset) - arrow_tip_x);
 
   if (show_arrow == ShowArrow::Yes)
   {
@@ -303,8 +303,7 @@ void BalloonTip::UpdateBoundsAndRedraw(const QPoint& target_arrow_tip_position,
       arrow_interior_fill_path.lineTo(right_line_x, interior_y_end);
     }
     // The middle border line
-    arrow_border_path.moveTo(arrow_tip_x + arrow_tip_local_x_offset,
-                             arrow_tip_interior_y);
+    arrow_border_path.moveTo(arrow_tip_x + arrow_tip_local_x_offset, arrow_tip_interior_y);
     arrow_border_path.lineTo(arrow_tip_x + arrow_tip_local_x_offset,
                              arrow_tip_interior_y + y_end_offset);
 
