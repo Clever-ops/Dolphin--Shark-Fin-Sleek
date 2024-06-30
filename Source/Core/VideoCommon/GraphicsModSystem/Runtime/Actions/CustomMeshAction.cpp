@@ -251,7 +251,7 @@ void CustomMeshAction::DrawImGui()
       if (GraphicsModEditor::Controls::AssetDisplay("MeshValue", editor.GetEditorState(),
                                                     &m_mesh_asset_id, GraphicsModEditor::Mesh))
       {
-        GraphicsModEditor::EditorEvents::ChangeOccurredEvent::Trigger();
+        GraphicsModEditor::EditorEvents::AssetReloadEvent::Trigger(m_mesh_asset_id);
         m_mesh_asset_changed = true;
       }
       ImGui::EndTable();
