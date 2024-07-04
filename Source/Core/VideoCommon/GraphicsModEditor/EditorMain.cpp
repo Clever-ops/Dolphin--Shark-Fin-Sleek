@@ -142,6 +142,7 @@ bool EditorMain::RebuildState()
   m_state->m_user_data.m_asset_library = std::make_shared<EditorAssetSource>();
   m_state->m_editor_data.m_asset_library =
       std::make_shared<VideoCommon::DirectFilesystemAssetLibrary>();
+  m_state->m_editor_data.m_asset_library->Watch(File::GetSysDirectory() + GRAPHICSMODEDITOR_DIR);
   m_state->m_runtime_data.m_texture_cache = std::make_shared<VideoCommon::CustomTextureCache>();
   m_change_occurred_event =
       EditorEvents::ChangeOccurredEvent::Register([this] { OnChangeOccured(); }, "EditorMain");
@@ -543,6 +544,7 @@ bool EditorMain::NewMod(std::string_view name, std::string_view author,
   m_inspect_only = false;
 
   m_asset_browser_panel->ResetCurrentPath();
+  m_state->m_user_data.m_asset_library->Watch(PathToString(mod_path));
 
   auto& system = Core::System::GetInstance();
   system.GetGraphicsModManager().SetEditorBackend(std::make_unique<EditorBackend>(*m_state));
@@ -592,6 +594,7 @@ bool EditorMain::LoadMod(std::string_view name)
   m_inspect_only = false;
 
   m_asset_browser_panel->ResetCurrentPath();
+  m_state->m_user_data.m_asset_library->Watch(PathToString(mod_path));
 
   system.GetGraphicsModManager().SetEditorBackend(std::make_unique<EditorBackend>(*m_state));
 
