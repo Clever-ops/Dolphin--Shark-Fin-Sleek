@@ -227,7 +227,7 @@ bool EditorMain::RebuildState()
   const std::filesystem::path pipeline_path_root_fs{pipeline_path_root};
 
   {
-    VideoCommon::DirectFilesystemAssetLibrary::AssetMap highlight_shader_asset_map;
+    VideoCommon::Assets::AssetMap highlight_shader_asset_map;
     highlight_shader_asset_map.try_emplace("metadata", pipeline_path_root_fs / "highlight" /
                                                            "color.shader.json");
     highlight_shader_asset_map.try_emplace("shader",
@@ -235,7 +235,7 @@ bool EditorMain::RebuildState()
     m_state->m_editor_data.m_asset_library->SetAssetIDMapData(
         "highlight_shader", std::move(highlight_shader_asset_map));
 
-    VideoCommon::DirectFilesystemAssetLibrary::AssetMap highlight_material_asset_map;
+    VideoCommon::Assets::AssetMap highlight_material_asset_map;
     highlight_material_asset_map.try_emplace("",
                                              pipeline_path_root_fs / "highlight" / "material.json");
     m_state->m_editor_data.m_asset_library->SetAssetIDMapData(
@@ -255,7 +255,7 @@ bool EditorMain::RebuildState()
   }
 
   {
-    VideoCommon::DirectFilesystemAssetLibrary::AssetMap simple_light_visual_shader_asset_map;
+    VideoCommon::Assets::AssetMap simple_light_visual_shader_asset_map;
     simple_light_visual_shader_asset_map.try_emplace("metadata",
                                                      pipeline_path_root_fs / "light_visualization" /
                                                          "simple-light-visualization.shader");
@@ -265,7 +265,7 @@ bool EditorMain::RebuildState()
     m_state->m_editor_data.m_asset_library->SetAssetIDMapData(
         "simple_light_visualization_shader", std::move(simple_light_visual_shader_asset_map));
 
-    VideoCommon::DirectFilesystemAssetLibrary::AssetMap simple_light_visual_material_asset_map;
+    VideoCommon::Assets::AssetMap simple_light_visual_material_asset_map;
     simple_light_visual_material_asset_map.try_emplace(
         "", pipeline_path_root_fs / "light_visualization" / "simple-light-visualization.material");
     m_state->m_editor_data.m_asset_library->SetAssetIDMapData(
