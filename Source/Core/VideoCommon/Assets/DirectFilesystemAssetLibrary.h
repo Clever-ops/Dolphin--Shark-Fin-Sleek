@@ -8,8 +8,8 @@
 #include <mutex>
 #include <string>
 
-#include "VideoCommon/Assets/WatchableFilesystemAssetLibrary.h"
 #include "VideoCommon/Assets/CustomTextureData.h"
+#include "VideoCommon/Assets/WatchableFilesystemAssetLibrary.h"
 
 namespace VideoCommon
 {
