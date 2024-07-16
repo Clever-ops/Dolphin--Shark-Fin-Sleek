@@ -938,36 +938,26 @@ bool MMU::IsOptimizableRAMAddress(const u32 address, const u32 access_size) cons
 }
 
 template <XCheckTLBFlag flag>
-bool MMU::IsRAMAddress(u32 address, bool translate)
+bool MMU::IsTranslatedRAMAddress(u32 address)
 {
-  if (translate)
+  if (auto translate_address = TranslateAddress<flag>(address); translate_address.Success())
   {
-    auto translate_address = TranslateAddress<flag>(address);
-    if (!translate_address.Success())
-      return false;
     address = translate_address.address;
-  }
-
-  u32 segment = address >> 28;
-  if (m_memory.GetRAM() && segment == 0x0 && (address & 0x0FFFFFFF) < m_memory.GetRamSizeReal())
-  {
-    return true;
-  }
-  else if (m_memory.GetEXRAM() && segment == 0x1 &&
-           (address & 0x0FFFFFFF) < m_memory.GetExRamSizeReal())
-  {
-    return true;
-  }
-  else if (m_memory.GetFakeVMEM() && ((address & 0xFE000000) == 0x7E000000))
-  {
-    return true;
-  }
-  else if (m_memory.GetL1Cache() && segment == 0xE &&
-           (address < (0xE0000000 + m_memory.GetL1CacheSize())))
-  {
-    return true;
+    return IsRAMAddress<flag>(translate_address.address);
   }
   return false;
+}
+
+template <XCheckTLBFlag _>
+bool MMU::IsRAMAddress(const u32 address) const
+{
+  const u32 segment = address >> 28;
+  const u32 i = address & 0x0FFFFFFF;
+  return m_memory.GetRAM() && segment == 0x0 && i < m_memory.GetRamSizeReal() ||
+         m_memory.GetEXRAM() && segment == 0x1 && i < m_memory.GetExRamSizeReal() ||
+         m_memory.GetFakeVMEM() && (address & 0xFE000000) == 0x7E000000 ||
+         m_memory.GetL1Cache() && segment == 0xE &&
+             address < 0xE0000000 + m_memory.GetL1CacheSize();
 }
 
 bool MMU::HostIsRAMAddress(const Core::CPUThreadGuard& guard, u32 address,
@@ -977,13 +967,15 @@ bool MMU::HostIsRAMAddress(const Core::CPUThreadGuard& guard, u32 address,
   switch (space)
   {
   case RequestedAddressSpace::Effective:
-    return mmu.IsRAMAddress<XCheckTLBFlag::NoException>(address, mmu.m_ppc_state.msr.DR);
+    return mmu.m_ppc_state.msr.DR ?
+               mmu.IsTranslatedRAMAddress<XCheckTLBFlag::NoException>(address) :
+               mmu.IsRAMAddress<XCheckTLBFlag::NoException>(address);
   case RequestedAddressSpace::Physical:
-    return mmu.IsRAMAddress<XCheckTLBFlag::NoException>(address, false);
+    return mmu.IsRAMAddress<XCheckTLBFlag::NoException>(address);
   case RequestedAddressSpace::Virtual:
     if (!mmu.m_ppc_state.msr.DR)
       return false;
-    return mmu.IsRAMAddress<XCheckTLBFlag::NoException>(address, true);
+    return mmu.IsTranslatedRAMAddress<XCheckTLBFlag::NoException>(address);
   }
 
   ASSERT(false);
@@ -1001,13 +993,15 @@ bool MMU::HostIsInstructionRAMAddress(const Core::CPUThreadGuard& guard, u32 add
   switch (space)
   {
   case RequestedAddressSpace::Effective:
-    return mmu.IsRAMAddress<XCheckTLBFlag::OpcodeNoException>(address, mmu.m_ppc_state.msr.IR);
+    return mmu.m_ppc_state.msr.IR ?
+               mmu.IsTranslatedRAMAddress<XCheckTLBFlag::OpcodeNoException>(address) :
+               mmu.IsRAMAddress<XCheckTLBFlag::OpcodeNoException>(address);
   case RequestedAddressSpace::Physical:
-    return mmu.IsRAMAddress<XCheckTLBFlag::OpcodeNoException>(address, false);
+    return mmu.IsRAMAddress<XCheckTLBFlag::OpcodeNoException>(address);
   case RequestedAddressSpace::Virtual:
     if (!mmu.m_ppc_state.msr.IR)
       return false;
-    return mmu.IsRAMAddress<XCheckTLBFlag::OpcodeNoException>(address, true);
+    return mmu.IsTranslatedRAMAddress<XCheckTLBFlag::OpcodeNoException>(address);
   }
 
   ASSERT(false);
