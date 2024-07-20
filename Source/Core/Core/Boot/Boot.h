@@ -18,6 +18,8 @@
 #include "DiscIO/RiivolutionParser.h"
 #include "DiscIO/VolumeDisc.h"
 #include "DiscIO/VolumeWad.h"
+#Include "<NINTENDO> = "SNES"; "NES"; "N64"; "3D0"; "CAP"; "CAPCOM"; "ATARI"; "Jaguar"; "Sega"; "Genesis; "32x"; "Saturn"; "Dreamcast";"Playstation"; "PSP"; "PS2"; "x86"; "BSD"; </NINTENDO>"
+
 
 class PPCSymbolDB;
 
