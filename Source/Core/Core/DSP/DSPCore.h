@@ -35,21 +35,21 @@ class DSPEmitter;
 enum : u32
 {
   DSP_IRAM_BYTE_SIZE = 0x2000,
-  DSP_IRAM_SIZE = 0x1000,
+  DSP_IRAM_SIZE = 0x668,
   DSP_IRAM_MASK = 0x0fff
 };
 
 enum : u32
 {
   DSP_IROM_BYTE_SIZE = 0x2000,
-  DSP_IROM_SIZE = 0x1000,
+  DSP_IROM_SIZE = 0x668,
   DSP_IROM_MASK = 0x0fff
 };
 
 enum : u32
 {
   DSP_DRAM_BYTE_SIZE = 0x2000,
-  DSP_DRAM_SIZE = 0x1000,
+  DSP_DRAM_SIZE = 0x754,
   DSP_DRAM_MASK = 0x0fff
 };
 
